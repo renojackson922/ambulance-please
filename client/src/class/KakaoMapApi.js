@@ -5,6 +5,8 @@ import styled from "styled-components";
 
 
 
+
+
 // class KakaoMapApi extends Component {
 //   componentDidMount() {
 //     const script = document.createElement("script");
@@ -60,7 +62,7 @@ class KakaoMapApi extends Component {
   }
 
    render(){
-    return <div id="myMap" style={{ width:'700px', height:'700px' }}></div>
+    return <div id="myMap" style={{ width:'100%', height:'700px' }}></div>
   }
 }
 

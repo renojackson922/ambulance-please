@@ -7,7 +7,9 @@ body {
     sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* background-color: #6d7bffd0 !important; */
   background-color: #fd8f46d0 !important;
+  /* background-image: url("./imgs/background.jpg") !important; */
 }
 
 .main-wrapper{

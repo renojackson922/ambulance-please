@@ -41,13 +41,11 @@ function Header(){
             textarea[i].setAttribute("onblur", "enableSelection=true")
         }    
  
-        
-
-      return () => {
-        document.head.removeChild(linkBootstrap);
-        document.body.removeChild(scriptFontAwesome);
-        document.body.removeChild(scriptBootstrap);
-      }
+        return () => {
+            document.head.removeChild(linkBootstrap);
+            document.body.removeChild(scriptFontAwesome);
+            document.body.removeChild(scriptBootstrap);
+        }
     }, []);
   
     return(

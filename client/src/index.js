@@ -5,6 +5,7 @@ import Header from './component/Header'
 import { Scrollbars } from 'react-custom-scrollbars';
 //import Geolocation from './component/Geolocation';
 import KakaoMapApi from './component/KakaoMapApi';
+import DataAPI from './component/DataAPI';
 import reportWebVitals from './reportWebVitals';
 
 
@@ -107,6 +108,7 @@ function GetAvaliableNumberColor(t){
 }
 
 function HospitalList(props){
+  DataAPI()
   const hospitals = props.hospitals;
   const listItems = hospitals.map(hospital => 
     //console.log(hospital);
@@ -134,7 +136,7 @@ function HospitalList(props){
     </Scrollbars>
     <ul className="list-group">
        <li className="list-group-item text-center">
-        <span>10개 더보기 +</span>
+        <span style={{fontSize: ".75rem"}}>10개 더보기 +</span>
       </li>     
     </ul>    
     </>
@@ -160,10 +162,10 @@ ReactDOM.render(
       </div>
       {/* <KakaoMapApi/> */}
     </div>
-    {/* <div style={{position:'absolute', bottom:'0px', height:'100px', backgroundColor:'#000'}}></div> */}
   </div>
   </React.StrictMode>,
   document.getElementById('root')
+  // ,<div style={{position:'absolute', bottom:'0px', height:'100px', backgroundColor:'#000'}}></div>
 );
 
 /*

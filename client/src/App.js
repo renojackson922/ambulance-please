@@ -107,80 +107,55 @@ function GetAvaliableNumberColor(t){
   
 }
 
-  function GetUserApi(){
-      const url = '/api/getDataApi'; /*URL*/
-      let queryParams = '?' + encodeURIComponent('stage1') + '=' + encodeURIComponent('서울특별시'); /**/
-      queryParams += '&' + encodeURIComponent('stage2') + '=' + encodeURIComponent('강남구'); /**/
-      queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
-      queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('10'); /**/
 
-      return axios.get(url + queryParams, { method: "get", responseType: "json" })
-                  .then((response) => { return response });
-  }
-
-  async function GetValueFromUserApi(){
-      var returnVal = await GetUserApi();
-      if(typeof returnVal !== "undefined"){
-        console.log(returnVal);
-        return returnVal;
-      }
-  }
-
-    function HospitalList(props){
+    function HospitalList(){
 
         let hospitals = [];
         let listItems = [];
-        // componentDidMount 와 componentDidUpdate 대응
 
-        useEffect(()=>{
-          hospitals = GetValueFromUserApi();
-          defer();
-          //console.log(hospitals)
+        // componentDidMount 와 componentDidUpdate 대응
+        useEffect(() => {       
         });
 
-        function defer() {
-            if(typeof hospitals !== "undefined"){
-              console.log("hospitals' not empty!: " + hospitals)
-              listItems = (hospitals.data.response.body.items.item).map(hospital => 
-                <li className="list-group-item" key={0} style={{minHeight:"70px"}}>
-                  <div style={{width:"30px", display:"inline", float:"left", padding:"10px 0"}}>
-                    <span style={{color: GetAvaliableNumberColor(0)}}>●</span>
-                  </div>
-                  <div style={{display:"inline", float:"left"}}>
-                    <span style={{display:"block"}}>{hospital.hospitalName}</span>
-                    <span style={{display:"block", fontSize: ".75rem"}}>{hospital.address}</span>
-                  </div>
-                  <div style={{display:"inline", float:"right"}}>
-                        <span style={{display:"block", fontSize:".75rem", color:"#fd8f46"}}>{0}m 이내</span>
-                        <span style={{display:"block", fontSize:".75rem"}}>가용병상: {0}석</span>         
-                  </div>
-                </li>
-              );
-          
-              return (
-                <>
-                <Scrollbars style={{width:"100%", height:"350px"}}>
-                  <ul className="list-group">
-                    {listItems}
-                  </ul>
-                </Scrollbars>
-                <ul className="list-group">
-                  <li className="list-group-item text-center">
-                    <span style={{fontSize: ".75rem"}}>10개 더보기 +</span>
-                  </li>     
-                </ul>  
-                <div>
-                { }
-                </div>
-                </>
-              );
-            } else {
-                console.log("waiting...");
-                setTimeout(function () { defer() }, 500);
-            }
-        }    
-        
-        return (<></>)
+        axios.get("http://localhost:5000/dataApi").then((response) => {
+          console.log(response);
+          return (
+            <>
+            <Scrollbars style={{width:"100%", height:"350px"}}>
+              <ul className="list-group">
+                {
+                  (response.data).map(hospital => 
+                    <li className="list-group-item" key={0} style={{minHeight:"70px"}}>
+                      <div style={{width:"30px", display:"inline", float:"left", padding:"10px 0"}}>
+                        <span style={{color: GetAvaliableNumberColor(0)}}>●</span>
+                      </div>
+                      <div style={{display:"inline", float:"left"}}>
+                        <span style={{display:"block"}}>{hospital.dutyName}</span>
+                        <span style={{display:"block", fontSize: ".75rem"}}>{hospital.hpid}</span>
+                      </div>
+                      <div style={{display:"inline", float:"right"}}>
+                            <span style={{display:"block", fontSize:".75rem", color:"#fd8f46"}}>{0}m 이내</span>
+                            <span style={{display:"block", fontSize:".75rem"}}>가용병상: {0}석</span>         
+                      </div>
+                    </li>
+                  )
+                }
+              </ul>
+            </Scrollbars>
+            <ul className="list-group">
+              <li className="list-group-item text-center">
+                <span style={{fontSize: ".75rem"}}>10개 더보기 +</span>
+              </li>     
+            </ul>  
+            <div>
+            { }
+            </div>
+            </>
+          );
+        }).catch((ex) => {
+            console.log(ex)
+        });           
+
     }
 
 function App() {
@@ -199,7 +174,7 @@ function App() {
           <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-map-pin"></i></button>
         </div>
         <div className="mt-2">
-          <HospitalList hospitals={hospitals} />   
+          <HospitalList />   
         </div>
       </div>
     </div>   

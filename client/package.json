@@ -43,5 +43,6 @@
   },
   "devDependencies": {
     "sass": "^1.32.8"
-  }
+  },
+  "proxy" : "http://localhost:8080" 
 }

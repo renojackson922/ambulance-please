@@ -3,7 +3,8 @@ import Header from './component/Header'
 import axios from 'axios'
 import { Scrollbars } from 'react-custom-scrollbars';
 import useAsync from './useAsync';
-
+import Distance from './class/Distance';
+import React, {useState} from 'react';
 
 const hospitals =  [
   {
@@ -103,21 +104,58 @@ function GetAvaliableNumberColor(t){
   
 }
 
+function getHopspitalAvailable(){
+  return axios.get('http://localhost:5000/dataApi/getHospitalAvailable')
+}
+
+function getHopspitalAddr(){
+  return axios.get('http://localhost:5000/dataApi/getHospitalAddr')
+}
+
 async function getDataApi() {
-  const response = await axios.get(
-    'http://localhost:5000/dataApi'
-  );
-  return response.data;
+  const response = await axios.all([getHopspitalAvailable(), getHopspitalAddr()])
+  return response;
 }
 
 function App() {
 
   const [state, refetch] = useAsync(getDataApi, []);
+  const [lng, setLng] = useState(0);
+  const [lat, setLat] = useState(0); 
   const { loading, data: hospitals, error } = state;
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(position) {
+      setLng(position.coords.longitude)
+      setLat(position.coords.latitude)
+    });
+  }
 
   if (loading) return <div>로딩중..</div>;
   if (error) return <div>에러가 발생했습니다</div>;
   if (!hospitals) return null;
+
+  let hosptialsAvail = hospitals[0].data;
+  const hosptialsAddr = hospitals[1].data;
+
+  // 두 개의 JSON 데이터를 조회하여 HPID 공통키가 있는 것들을 조회해서 주소와 위/경도 정보 밀어넣기
+  for (let [indexAvail, valAvail] of hosptialsAvail.entries()) {
+    hosptialsAvail[indexAvail].dutyAddr = "주소정보가 없습니다"
+    hosptialsAvail[indexAvail].distCalc = 0
+    for (let [indexAddr, valAddr] of hosptialsAddr.entries()) {
+      if(hosptialsAvail[indexAvail].hpid === hosptialsAddr[indexAddr].hpid){
+        hosptialsAvail[indexAvail].dutyAddr = hosptialsAddr[indexAddr].dutyAddr;
+        let targetLat = hosptialsAddr[indexAddr].wgs84Lat ?? 0;
+        let targetLng = hosptialsAddr[indexAddr].wgs84Lon ?? 0;
+        hosptialsAvail[indexAvail].distCalc = Distance(lat, lng, targetLat, targetLng, 'K').toFixed(2);
+      }
+    }
+  }
+
+
+
+  
+  console.log(hosptialsAvail)
 
   return (
     <>
@@ -137,21 +175,23 @@ function App() {
             <Scrollbars style={{ width: "100%", height: "350px" }}>
               <ul className="list-group">
               {
-                (hospitals).map(hospital => 
+                (hosptialsAvail).map(hospital => 
                   <li className="list-group-item" key={hospital.hpid} style={{ minHeight: "70px" }}>
-                    <div style={{ width: "30px", display: "inline", float: "left", padding: "10px 0" }}>
-                      <span style={{ color: GetAvaliableNumberColor(0) }}>●</span>
-                    </div>
-                    <div style={{ display: "inline", float: "left" }}>
-                      <span style={{ display: "block" }}>{hospital.dutyName}</span>
-                      <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.hpid}</span>
-                    </div>
-                    <div style={{ display: "inline", float: "right" }}>
-                      <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>0m 이내</span>
-                      <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: 0석</span>
-                    </div>
-                  </li>
-                  )
+                  <div style={{ width: "30px", display: "inline", float: "left", padding: "10px 0" }}>
+                    <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
+                  </div>
+                  <div style={{ display: "inline", float: "left" }}>
+                    <span style={{ display: "block" }}>{hospital.dutyName}</span>
+                    <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.dutyAddr}</span>
+                  </div>
+                  <div style={{ display: "inline", float: "right" }}>
+                    <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>{ hospital.distCalc } km 이내</span>
+                    <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: {hospital.hvec <= 0 ? 0 : hospital.hvec }석</span>
+                    <span style={{ display: "block", fontSize: ".75rem" }}>마지막 업데이트:&nbsp;
+                    { hospital.hvidate.toString().substring(8).substring(0,2) }시 {hospital.hvidate.toString().substring(8).substring(3,4)}분 </span>
+                  </div>
+                </li>
+                )
               }
               </ul>
             </Scrollbars>

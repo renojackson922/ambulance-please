@@ -1,6 +1,8 @@
 @import './fonts/css/ibm-plex-sans-kr.min.css';
 
 body {
+  width:100vw;
+  height:100vw;
   margin: 0;
   font-family: 'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -10,7 +12,20 @@ body {
   /* background-color: #6d7bffd0 !important; */
   background-color: #fd8f46d0 !important;
   /* background-image: url("./imgs/background.jpg") !important; */
+  background-image: url('./imgs/amb_hd_1.png')!important;
+  background-size: 90%;
+  background-position-x: right;
+  background-position-y: 450px;
+  background-repeat: no-repeat;
 }
+/* 
+body::after{
+  display: block;
+  content: "";
+  width: 3px;
+  height: 5px;
+  background-image: transparent url('./imgs/amb_hd_1.png') no-repeat;
+} */
 
 .main-wrapper{
   padding-right:20px;
@@ -31,3 +46,4 @@ code {
 .amb-title-sub{
   display:block;
 }
+

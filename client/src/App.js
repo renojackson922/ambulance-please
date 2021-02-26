@@ -2,11 +2,8 @@ import './App.css';
 import Header from './component/Header'
 import axios from 'axios'
 import { Scrollbars } from 'react-custom-scrollbars';
-//import Geolocation from './component/Geolocation';
-//import KakaoMapApi from './component/KakaoMapApi';
-import DataAPI from './component/DataAPI';
-import { useEffect, useState } from 'react';
-import { render } from 'react-dom';
+import useAsync from './useAsync';
+
 
 const hospitals =  [
   {
@@ -90,7 +87,6 @@ const hospitals =  [
   }
 ];
 
-
 function GetAvaliableNumberColor(t){
 
   const roomAvailable = t || 0;
@@ -107,77 +103,66 @@ function GetAvaliableNumberColor(t){
   
 }
 
-
-    function HospitalList(){
-
-        let hospitals = [];
-        let listItems = [];
-
-        // componentDidMount 와 componentDidUpdate 대응
-        useEffect(() => {       
-        });
-
-        axios.get("http://localhost:5000/dataApi").then((response) => {
-          console.log(response);
-          return (
-            <>
-            <Scrollbars style={{width:"100%", height:"350px"}}>
-              <ul className="list-group">
-                {
-                  (response.data).map(hospital => 
-                    <li className="list-group-item" key={0} style={{minHeight:"70px"}}>
-                      <div style={{width:"30px", display:"inline", float:"left", padding:"10px 0"}}>
-                        <span style={{color: GetAvaliableNumberColor(0)}}>●</span>
-                      </div>
-                      <div style={{display:"inline", float:"left"}}>
-                        <span style={{display:"block"}}>{hospital.dutyName}</span>
-                        <span style={{display:"block", fontSize: ".75rem"}}>{hospital.hpid}</span>
-                      </div>
-                      <div style={{display:"inline", float:"right"}}>
-                            <span style={{display:"block", fontSize:".75rem", color:"#fd8f46"}}>{0}m 이내</span>
-                            <span style={{display:"block", fontSize:".75rem"}}>가용병상: {0}석</span>         
-                      </div>
-                    </li>
-                  )
-                }
-              </ul>
-            </Scrollbars>
-            <ul className="list-group">
-              <li className="list-group-item text-center">
-                <span style={{fontSize: ".75rem"}}>10개 더보기 +</span>
-              </li>     
-            </ul>  
-            <div>
-            { }
-            </div>
-            </>
-          );
-        }).catch((ex) => {
-            console.log(ex)
-        });           
-
-    }
+async function getDataApi() {
+  const response = await axios.get(
+    'http://localhost:5000/dataApi'
+  );
+  return response.data;
+}
 
 function App() {
+
+  const [state, refetch] = useAsync(getDataApi, []);
+  const { loading, data: hospitals, error } = state;
+
+  if (loading) return <div>로딩중..</div>;
+  if (error) return <div>에러가 발생했습니다</div>;
+  if (!hospitals) return null;
+
   return (
     <>
-    <Header/>
-    <div className="main-wrapper" style={{maxWidth:"768px", margin:"0 auto"}}>
-      <div className="container" style={{marginTop:"10vh"}}>
-        <div style={{textAlign:"right"}}>
-          <span className="amb-title">응급실 잔여병상 현황</span>
-          <span className="amb-title-sub">ver 0.0.1</span>
+      <Header/>
+      <div className="main-wrapper" style={{maxWidth:"768px", margin:"0 auto"}}>
+        <div className="container" style={{marginTop:"10vh"}}>
+          <div style={{textAlign:"right"}}>
+            <span className="amb-title">응급실 잔여병상 현황</span>
+            <span className="amb-title-sub">ver 0.0.1</span>
+          </div>
+          <div className="input-group mt-4">
+            <input type="text" className="form-control" placeholder="ex) 서울특별시 서초구" />
+            <button className="btn btn-outline-secondary" type="button" onClick={refetch} style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-search"></i></button>
+            <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-map-pin"></i></button>
+          </div>
+          <div className="mt-2">          
+            <Scrollbars style={{ width: "100%", height: "350px" }}>
+              <ul className="list-group">
+              {
+                (hospitals).map(hospital => 
+                  <li className="list-group-item" key={hospital.hpid} style={{ minHeight: "70px" }}>
+                    <div style={{ width: "30px", display: "inline", float: "left", padding: "10px 0" }}>
+                      <span style={{ color: GetAvaliableNumberColor(0) }}>●</span>
+                    </div>
+                    <div style={{ display: "inline", float: "left" }}>
+                      <span style={{ display: "block" }}>{hospital.dutyName}</span>
+                      <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.hpid}</span>
+                    </div>
+                    <div style={{ display: "inline", float: "right" }}>
+                      <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>0m 이내</span>
+                      <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: 0석</span>
+                    </div>
+                  </li>
+                  )
+              }
+              </ul>
+            </Scrollbars>
+          </div>
         </div>
-        <div className="input-group mt-4">
-          <input type="text" className="form-control" placeholder="ex) 서울특별시 서초구" />
-          <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-search"></i></button>
-          <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-map-pin"></i></button>
-        </div>
-        <div className="mt-2">
-          <HospitalList />   
-        </div>
-      </div>
-    </div>   
+      </div>  
+      {/* <ul className="list-group">
+        <li className="list-group-item text-center">
+          <span style={{ fontSize: ".75rem" }}>10개 더보기 +</span>
+        </li>
+      </ul> */}
     </>
   );
 }

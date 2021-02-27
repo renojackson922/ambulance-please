@@ -13,7 +13,7 @@ router.get("/dataApi/getHospitalAvailable", (req, res) => {
     
     axios.get(url + queryParams, { method: "get", responseType: "json" })
     .then((response) => {
-        console.log(response.data.response.body.items.item);
+        //console.log(response.data.response.body.items.item);
         res.status(200).send(response.data.response.body.items.item);
     }).catch((ex) => {
         console.log(ex)
@@ -34,7 +34,7 @@ router.get("/dataApi/getHospitalAddr", (req, res) => {
     
     axios.get(url + queryParams, { method: "get", responseType: "json" })
     .then((response) => {
-        console.log(response.data.response.body.items.item);
+        //console.log(response.data.response.body.items.item);
         res.status(200).send(response.data.response.body.items.item);
     }).catch((ex) => {
         console.log(ex)

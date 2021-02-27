@@ -2,7 +2,7 @@
 
 body {
   width:100vw;
-  height:100vw;
+  /* height:100vw; */
   margin: 0;
   font-family: 'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -13,9 +13,9 @@ body {
   background-color: #fd8f46d0 !important;
   /* background-image: url("./imgs/background.jpg") !important; */
   background-image: url('./imgs/amb_hd_1.png')!important;
-  background-size: 90%;
+  background-size: 400px;
   background-position-x: right;
-  background-position-y: 450px;
+  background-position-y: 400px;
   background-repeat: no-repeat;
 }
 /* 

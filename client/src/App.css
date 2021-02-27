@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.track-vertical {
+  right: 2px;
+  bottom: 2px;
+  top: 2px;
+  border-radius: 3px;
+  z-index:3;
+}

@@ -6,87 +6,6 @@ import useAsync from './useAsync';
 import Distance from './class/Distance';
 import React, {useState} from 'react';
 
-const hospitals =  [
-  {
-    hospitalCode : 3008,
-    hospitalName : "강남세브란스병원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 500,
-    roomAvailable: 3
-  },
-  {
-    hospitalCode : 3009,
-    hospitalName : "강남베드로병원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 1400,
-    roomAvailable: 15
-  },
-  {
-    hospitalCode : 3010,
-    hospitalName : "365MC",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 3700,
-    roomAvailable: 7
-  },
-  {
-    hospitalCode : 3011,
-    hospitalName : "기쁨병원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 5700,
-    roomAvailable: 4
-  },
-  {
-    hospitalCode : 3012,
-    hospitalName : "상계백병원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 10000,
-    roomAvailable: 0
-  },{
-    hospitalCode : 3013,
-    hospitalName : "강건마가정의원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 500,
-    roomAvailable: 15
-  },
-  {
-    hospitalCode : 3014,
-    hospitalName : "라기라치과의원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 1400,
-    roomAvailable: 15
-  },
-  {
-    hospitalCode : 3015,
-    hospitalName : "백기산한의원",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 3700,
-    roomAvailable: 15
-  },
-  {
-    hospitalCode : 3016,
-    hospitalName : "산케메디컬센터",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 5700,
-    roomAvailable: 3
-  },
-  {
-    hospitalCode : 3017,
-    hospitalName : "표독수이비인후과",
-    address: "서울특별서 강남구 논현로 164 (튼튼영어빌딩)",
-    tel: "02-560-0494",
-    distance: 10000,
-    roomAvailable: 0
-  }
-];
 
 function GetAvaliableNumberColor(t){
 
@@ -152,11 +71,6 @@ function App() {
     }
   }
 
-
-
-  
-  console.log(hosptialsAvail)
-
   return (
     <>
       <Header/>
@@ -172,28 +86,36 @@ function App() {
             <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-map-pin"></i></button>
           </div>
           <div className="mt-2">          
-            <Scrollbars style={{ width: "100%", height: "350px" }}>
-              <ul className="list-group">
+            <Scrollbars 
+              autoHide
+              autoHideTimeout={1000}
+              autoHideDuration={200}
+              style={{ width: "100%", height: "350px" }} 
+              renderTrackVertical={({ style, ...props }) => <div {...props} className="track-vertical" style={{ ...style }}/> } >
+              <div className="list-group">
               {
                 (hosptialsAvail).map(hospital => 
-                  <li className="list-group-item" key={hospital.hpid} style={{ minHeight: "70px" }}>
-                  <div style={{ width: "30px", display: "inline", float: "left", padding: "10px 0" }}>
-                    <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
-                  </div>
-                  <div style={{ display: "inline", float: "left" }}>
-                    <span style={{ display: "block" }}>{hospital.dutyName}</span>
-                    <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.dutyAddr}</span>
-                  </div>
-                  <div style={{ display: "inline", float: "right" }}>
-                    <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>{ hospital.distCalc } km 이내</span>
-                    <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: {hospital.hvec <= 0 ? 0 : hospital.hvec }석</span>
-                    <span style={{ display: "block", fontSize: ".75rem" }}>마지막 업데이트:&nbsp;
-                    { hospital.hvidate.toString().substring(8).substring(0,2) }시 {hospital.hvidate.toString().substring(8).substring(3,4)}분 </span>
-                  </div>
-                </li>
+                  <a className="list-group-item list-group-item-action flex-column align-items-start" key={hospital.hpid} style={{ minHeight: "70px" }}>
+                    <div className="d-flex "> {/*d-flex w-100 justify-content-between*/}
+                      <div style={{ width: "30px", padding: "10px 0" }}>
+                        <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
+                      </div>
+                      <div>
+                        <span style={{ display: "block" }}>{hospital.dutyName}</span>
+                        <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.dutyAddr}</span>
+                      </div>
+                      <div className="ms-auto">
+                        <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>{ hospital.distCalc } km 이내</span>
+                        <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: {hospital.hvec <= 0 ? 0 : hospital.hvec }석</span>
+                        <span style={{ display: "block", fontSize: ".75rem" }}>마지막 업데이트:&nbsp;
+                        { hospital.hvidate.toString().substring(8).substring(0,2) }시 {hospital.hvidate.toString().substring(8).substring(3,4)}분 </span>
+                      </div>
+                    </div>
+                  </a>
                 )
               }
-              </ul>
+              </div>
+              
             </Scrollbars>
           </div>
         </div>

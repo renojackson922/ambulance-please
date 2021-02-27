@@ -4,7 +4,7 @@ import axios from 'axios'
 import { Scrollbars } from 'react-custom-scrollbars';
 import useAsync from './useAsync';
 import Distance from './class/Distance';
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef } from 'react';
 
 
 function GetAvaliableNumberColor(t){
@@ -22,21 +22,19 @@ function GetAvaliableNumberColor(t){
     return "#000";
   
 }
-
-function getHopspitalAvailable(){
-  return axios.get('http://localhost:5000/dataApi/getHospitalAvailable')
-}
-
-function getHopspitalAddr(){
-  return axios.get('http://localhost:5000/dataApi/getHospitalAddr')
-}
-
+/*  API 호출부분 */ 
 async function getDataApi() {
   const response = await axios.all([getHopspitalAvailable(), getHopspitalAddr()])
   return response;
 }
+function getHopspitalAvailable(){
+  return axios.get('http://localhost:5000/dataApi/getHospitalAvailable')
+}
+function getHopspitalAddr(){
+  return axios.get('http://localhost:5000/dataApi/getHospitalAddr')
+}
 
-function App() {
+function RenderHospitalList(){
 
   const [state, refetch] = useAsync(getDataApi, []);
   const [lng, setLng] = useState(0);
@@ -54,23 +52,55 @@ function App() {
   if (error) return <div>에러가 발생했습니다</div>;
   if (!hospitals) return null;
 
-  let hosptialsAvail = hospitals[0].data;
+  let hosptialsAvailTmp = hospitals[0].data;
   const hosptialsAddr = hospitals[1].data;
 
   // 두 개의 JSON 데이터를 조회하여 HPID 공통키가 있는 것들을 조회해서 주소와 위/경도 정보 밀어넣기
-  for (let [indexAvail, valAvail] of hosptialsAvail.entries()) {
-    hosptialsAvail[indexAvail].dutyAddr = "주소정보가 없습니다"
-    hosptialsAvail[indexAvail].distCalc = 0
+  for (let [indexAvail, valAvail] of hosptialsAvailTmp.entries()) {
+    hosptialsAvailTmp[indexAvail].dutyAddr = "주소정보가 없습니다"
+    hosptialsAvailTmp[indexAvail].distCalc = 0
     for (let [indexAddr, valAddr] of hosptialsAddr.entries()) {
-      if(hosptialsAvail[indexAvail].hpid === hosptialsAddr[indexAddr].hpid){
-        hosptialsAvail[indexAvail].dutyAddr = hosptialsAddr[indexAddr].dutyAddr;
+      if(hosptialsAvailTmp[indexAvail].hpid === hosptialsAddr[indexAddr].hpid){
+        hosptialsAvailTmp[indexAvail].dutyAddr = hosptialsAddr[indexAddr].dutyAddr;
         let targetLat = hosptialsAddr[indexAddr].wgs84Lat ?? 0;
         let targetLng = hosptialsAddr[indexAddr].wgs84Lon ?? 0;
-        hosptialsAvail[indexAvail].distCalc = Distance(lat, lng, targetLat, targetLng, 'K').toFixed(2);
+        hosptialsAvailTmp[indexAvail].distCalc = Distance(lat, lng, targetLat, targetLng, 'K').toFixed(2);
       }
     }
   }
 
+  hosptialsAvailTmp.sort((a,b) => {
+    return a.distCalc - b.distCalc;
+  });
+
+  return (
+    (hosptialsAvailTmp).map(hospital => hospital.distCalc == 0 ? "" : 
+      <a className="list-group-item list-group-item-action flex-column align-items-start" key={hospital.hpid} style={{ minHeight: "70px" }}>
+        <div className="d-flex "> {/*d-flex w-100 justify-content-between*/}
+          <div style={{ width: "30px", padding: "10px 0"  }}>
+            <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
+          </div>
+          <div style={{minWidth:"160px"}}>
+            <span style={{ display: "block" }}>{hospital.dutyName}</span>
+            <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.dutyAddr}</span>
+          </div>
+          <div className="ms-auto">
+            <span style={{ display: "block", textAlign:"right", fontSize: ".75rem", color: "#fd8f46" }}>{ hospital.distCalc } km 이내</span>
+            <span style={{ display: "block", textAlign:"right", fontSize: ".75rem" }}>가용병상: {hospital.hvec <= 0 ? 0 : hospital.hvec }석</span>
+            <span style={{ display: "block", textAlign:"right", fontSize: ".75rem" }}>마지막 업데이트:&nbsp;
+            { hospital.hvidate.toString().substring(8).substring(0,2) }시 {hospital.hvidate.toString().substring(8).substring(3,4)}분 </span>
+          </div>
+        </div>
+      </a>
+    )
+  )
+}
+
+
+function App() {
+
+  const [test, setTest] = useState([]); 
+  
   return (
     <>
       <Header/>
@@ -82,7 +112,7 @@ function App() {
           </div>
           <div className="input-group mt-4">
             <input type="text" className="form-control" placeholder="ex) 서울특별시 서초구" />
-            <button className="btn btn-outline-secondary" type="button" onClick={refetch} style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-search"></i></button>
+            <button className="btn btn-outline-secondary" onClick={()=>{setTest()}} type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-search"></i></button>
             <button className="btn btn-outline-secondary" type="button" style={{width:"40px", backgroundColor:"#fff"}}><i className="fas fa-map-pin"></i></button>
           </div>
           <div className="mt-2">          
@@ -93,38 +123,12 @@ function App() {
               style={{ width: "100%", height: "350px" }} 
               renderTrackVertical={({ style, ...props }) => <div {...props} className="track-vertical" style={{ ...style }}/> } >
               <div className="list-group">
-              {
-                (hosptialsAvail).map(hospital => 
-                  <a className="list-group-item list-group-item-action flex-column align-items-start" key={hospital.hpid} style={{ minHeight: "70px" }}>
-                    <div className="d-flex "> {/*d-flex w-100 justify-content-between*/}
-                      <div style={{ width: "30px", padding: "10px 0"  }}>
-                        <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
-                      </div>
-                      <div>
-                        <span style={{ display: "block" }}>{hospital.dutyName}</span>
-                        <span style={{ display: "block", fontSize: ".75rem" }}>{hospital.dutyAddr}</span>
-                      </div>
-                      <div className="ms-auto">
-                        <span style={{ display: "block", fontSize: ".75rem", color: "#fd8f46" }}>{ hospital.distCalc } km 이내</span>
-                        <span style={{ display: "block", fontSize: ".75rem" }}>가용병상: {hospital.hvec <= 0 ? 0 : hospital.hvec }석</span>
-                        <span style={{ display: "block", fontSize: ".75rem" }}>마지막 업데이트:&nbsp;
-                        { hospital.hvidate.toString().substring(8).substring(0,2) }시 {hospital.hvidate.toString().substring(8).substring(3,4)}분 </span>
-                      </div>
-                    </div>
-                  </a>
-                )
-              }
-              </div>
-              
+                { RenderHospitalList() } 
+              </div>      
             </Scrollbars>
           </div>
         </div>
       </div>  
-      {/* <ul className="list-group">
-        <li className="list-group-item text-center">
-          <span style={{ fontSize: ".75rem" }}>10개 더보기 +</span>
-        </li>
-      </ul> */}
     </>
   );
 }

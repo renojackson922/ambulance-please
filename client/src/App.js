@@ -97,7 +97,7 @@ function App() {
                 (hosptialsAvail).map(hospital => 
                   <a className="list-group-item list-group-item-action flex-column align-items-start" key={hospital.hpid} style={{ minHeight: "70px" }}>
                     <div className="d-flex "> {/*d-flex w-100 justify-content-between*/}
-                      <div style={{ width: "30px", padding: "10px 0" }}>
+                      <div style={{ width: "30px", padding: "10px 0"  }}>
                         <span style={{ color: GetAvaliableNumberColor(hospital.hvec) }}>●</span>
                       </div>
                       <div>
